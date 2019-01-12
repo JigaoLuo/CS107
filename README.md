@@ -1,4 +1,4 @@
-# CS107_Stanford
+git # CS107_Stanford
 
 Here would be some lecture notes and assignments coming. I would try my best to take the note seriously with detail. If that is combined with some chinese characters, don't be bothered.
 
