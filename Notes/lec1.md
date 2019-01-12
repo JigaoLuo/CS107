@@ -4,7 +4,7 @@
 - C++, 
 - Concurrent programming – that’s not a language, that’s just a paradigm,
 - Scheme 
-- Python 
+- Python
 
 The real intellectual value in learning all of these languages is to really study the paradigms that they represent. Programming in C or C++ is a diff. process when programming with scheme and Python.
 
