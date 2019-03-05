@@ -184,6 +184,14 @@ There's zero in the middle. That's why it breaks it symmetrically a little bit.
 $(-1)^s * (1.x) * 2^{exp-127}$  
 
 ---
+**Big & Little Endian:**
+bit pattern representation for `short 1`:
+```
+big    Low Add. 00000000 00000001 High Add.
+little Low Add. 00000001 00000000 High Add.
+```
+
+---
 **What happens when assigning an integer to a float, or a float to an integer:**  
 
 ```C++
@@ -224,4 +232,20 @@ short s = *(short*)&f; // the figures are different sizes
 f    xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx yyyyyyyy yyyyyyyy yyyyyyyy yyyyyyyy 
 s    xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx only the first two Bytes de-referenced
 ```
+`&f` will be firstly evaluated to a pointer (first address of f).
 **Only the first two Bytes of the float will be de-referenced to a short.**
+
+
+Same example:
+```C++
+double d = 7.0;  // 8 Bytes
+char ch = *(char*)&d; // the figures are different sizes
+```
+
+Tricky one:
+```C++
+short s = 45;  // 2 Bytes
+double d = *(double*)&s; // 8 Bytes
+```
+`&s` will be firstly evaluated to a pointer (first address of s).
+**Then reach 6 extra unknown address for double**
