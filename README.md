@@ -12,5 +12,27 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - Better Type Safety and Type Identification in Scheme
 - Web Programming with Python
 
-[Lecture_2: WAIT_HERE](Notes/lec2.md)
-- The low-level memory mechanics
+[Lecture_2: The low-level memory mechanics](Notes/lec2.md)
+- Data Types
+- Binary Representation
+- Big / Little Endian
+- Pointer
+
+[Lecture_3: Struct and Array in Memory](Notes/lec3.md)
+- Struct
+- Array
+- Structs with Arrays
+- Pointer Arithmetic
+- Heap
+- `strcpy`
+  
+[Lecture_4: Generics in C](Notes/lec4.md)
+- `memcpy`
+- `void swap(int* ap, int* bp)`
+- `void swap(void* vp1, void* vp2, int size)`
+- `strdup`
+- `int linearSearch(int key, int array[], int size)`
+- `void* linearSearch(void* key, void* base, int n, int elemSize)`
+- `void* linearSearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(void*, void*))`
+- `int IntCmp(void* elem1, void* elem2)`
+

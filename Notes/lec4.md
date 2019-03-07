@@ -1,4 +1,4 @@
-### How to write generics in C
+### Generics in C
 To  use advanced memory terminology to describe what happens. 
 ```C++
 int a = 7; 
@@ -337,6 +337,9 @@ After `swap`:
 <br>
 <br>
 
+---
+### Generics Linear search 
+
 A linear search from front to back of the array for the first instance of key in that array, and I want it to return the index of it or -1 if it can't be found.
 ```C++
 int linearSearch(int key, int array[], int size)
@@ -374,6 +377,9 @@ Just cast it to be a `char *` so that I can do normal math against a pointer.
 like string comparison but it’s not dealing with characters specifically. It compares this many bytes at that address to this many bytes at that address and if they are a dead match, it returns zero. It would otherwise return a positive number or a negative number depending on whether or not the first non-matching bytes differ in a negative direction or a positive direction.
 
 
+<br>
+<br>
+<br>
 
 ```C++
 void* linearSearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(void*, void*))
@@ -381,7 +387,7 @@ void* linearSearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(vo
   for (int i = 0; i < n; ++i) {
     void* elemAdd = (char*)base + i * elemSize; 
     // base + i * elemSize : wrong, compiler not know how large is the offset, not know the type of the base
-    if (memcmp(key, elemAdd, elemSize) == 0) {
+    if (cmpFunc(key, elemAdd, elemSize) == 0) {
       return elemAdd;
     }
   }
@@ -390,3 +396,163 @@ void* linearSearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(vo
 ```
 
 That means of **the fifth parameter has to be a function that takes two `void *`s**.
+
+
+```C++
+int IntCmp(void* elem1, void* elem2){
+  int* ip1 = elem1;
+  int* ip2 = elem2;
+  return *ip1 - *ip2;
+}
+
+int array[] = {4, 2, 3, 7, 11, 6};
+int size = 6;
+int searchNum = 7;
+
+// sizeof(int) is compile time evaluated as 4
+int* found = linearSearch(&searchNum, array, size, sizeof(int), IntCmp);
+if (found == NULL) {
+  // not found
+} else {
+  // found
+}
+```
+
+|array|4|
+|-|---|
+
+|array + 4|2|
+|-|---|
+
+|array + 8|3|
+|-|---|
+
+|array + 12|7|
+|-|---|
+
+|array + 16|11|
+|-|---|
+
+|array + 20|6|
+|-|---|
+
+<br>
+
+|&searchNum|7|
+|-|---|
+
+
+
+All the other languages are all so much younger that they've learned from C's mistakes and they have better solution for supporting **generics**. 
+
+**Advantage:**  
+It's very fast. You only use one copy of the code, ever, to do all of your linear searching. 
+
+**The template approach:**  
+more type safe. You get more information and compile time, but you get code bloat because you've got one instance of that linear search algorithm for every single data type you ever searched for. 
+
+<br>
+<br>
+
+**Another Example:** 
+```C++
+int StrCmp(void* vp1, void* vp2)
+{
+  // because vp1, vp2 are char**
+
+  // vp2 from notes as char** 
+  // | afrer one time de-reference: char* as element in notes, which pointin at a char(string) 
+  // | after two time de-reference: a char(string) 
+  char* s1 = *(char**)vp1;
+  char* s2 = *(char**)vp2;
+  // s1, s2 are pointing at the first char of the string
+  return strcmp(s1, s2);
+}
+
+
+char* notes[] = {"Ab", "F#", "B", "Gb", "D"};  // notes is pointer to pointer == array of pointer
+char* favoriteNode = "Eb";
+char** found = linearSearch(&favoriteNote, notes, 5, sizeof(char*), StrCmp);
+// why &favoriteNote: notes is already a char**
+// why sizeof(char*): a single char** de-referenced is a char*
+```
+
+|notes|add_0|
+|-|---|
+
+|notes + 4|add_1|
+|-|---|
+
+|notes + 8|add_2|
+|-|---|
+
+|notes + 12|add_3|
+|-|---|
+
+|notes + 16|add_4|
+|-|---|
+
+<br>
+
+|favoriteNode|"Eb"|
+|-|---|
+
+<br>
+
+|&favoriteNode|favoriteNode|
+|-|---|
+
+<br>
+
+|add_0|"Ab"|
+|-|---|
+
+|add_1|"F#"|
+|-|---|
+
+|add_2|"B"|
+|-|---|
+
+|add_3|"Gb"|
+|-|---|
+
+|add_4|"D"|
+|-|---|
+
+How `notes` is stored:  
+They’re **not in the Heap**, they’re actually **global variables that happen to be constant**. It’s like normal global variables, except they happen to be character arrays that reside up there, and these are replaced at load time with the base addresses of the A, F , Gb, D.
+
+<br>
+<br>
+
+---
+When I say function, I’m talking about this **object-oriented-less unit**, which is just some block of code that gets called as a function that has no object or class declaration aroun it.
+
+When I’m talking about the type of number functions or functions that are inside classes, I don’t refer to them as functions, I refer to them as **methods**.  
+
+**The difference between a function and a method**, they look very similar, except that methods actually have the address of the relevant object lying around as this invisible parameter via this invisible
+parameter called this.
+
+
+---
+
+```C++
+void* binarySearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(void*, void*))
+{
+  for (int i = 0; i < n; ++i) {
+    void* elemAdd = (char*)base + i * elemSize; 
+    // base + i * elemSize : wrong, compiler not know how large is the offset, not know the type of the base
+    if (cmpFunc(key, elemAdd, elemSize) == 0) {
+      return elemAdd;
+    }
+  }
+  return NULL;
+}
+```
+
+The type of function that gets passed right here has to be either a **global function** that has nothing to do with the class or it has to be **a method inside a class that’s declared as static**, which means that it does not have any this pointer passed around on your behalf behind
+the scenes.
+
+**C++ methods**, those** number functions that are defined in classes**, normally **pass around the address of the receiving object via an invisible parameter called `this`**. If you need to you can actually refer to the keyword this inside the implementation of any method, and it just evaluates to the address of the object that’s being manipulated.
+
+That’s what makes a method different than a regular function. **Regular functions** have nothing to do with objects so there’s **no invisible `this` pointer being passed around**. You have to pass one of those object-oriented-less normal functions, or the name of one, as the fifth primary to bsearch.

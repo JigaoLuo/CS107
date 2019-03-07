@@ -312,9 +312,13 @@ High Add.
 |-|---|
 
 
+
 <br>
 <br>
-**Little about Heap:**
+
+---
+
+**Little about Heap:**  
 **in Heap:**
 |add|"Colleen\0"|
 |-|---|
