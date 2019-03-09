@@ -27,7 +27,7 @@ void swap(int* ap, int* bp)
 |bp or *b| -> 7|
 |-|---|
 
-|*temp*| -> 7|
+|temp| -> 7|
 |-|---|
 
 Make `a` and `b` **`float`**. 
@@ -89,7 +89,9 @@ int i = 1;
 short s = 2;
 swap(&i, &s, sizeof(short));
 ```
+
 before swap:
+
 |vp1 or &i| -> High Add. 00000000 00000000 00000000 00000001 Low Add.|
 |-|---|
 
@@ -97,6 +99,7 @@ before swap:
 |-|---|
 
 after swap:
+
 |vp1 or &i| -> High Add. 00000000 00000000 00000000 00000010 Low Add.|
 |-|---|
 
@@ -178,6 +181,7 @@ char* wife = strdup("Wilma");
 |-|---|
 
 **in Heap:**
+
 |add_1|"Fred\0"|
 |-|---|
 
@@ -209,6 +213,7 @@ Actuatlly `vp1` and `vp2` are `char**`.
 |-|---|
 
 **in Heap:**
+
 |add_1|"Fred\0"|
 |-|---|
 
@@ -238,6 +243,7 @@ Before `swap`:
 |-|---|
 
 **in Heap:**
+
 |add_1|"Fred\0"|
 |-|---|
 
@@ -246,6 +252,7 @@ Before `swap`:
 <br>
 
 After `swap`:
+
 |buffer|"Fred"|
 |-|---|
 
@@ -264,6 +271,7 @@ After `swap`:
 |-|---|
 
 **in Heap:**
+
 |add_1|"Wilm\0"|
 |-|---|
 
@@ -283,6 +291,7 @@ swap(husband, &wife, sizeof(char*));  // assuming sizeof(char*) == 4
 One is `char*`, another is `char**`. "Fred" 4 Bytes will be exchanged with the address `&wife` 4 Bytes.
 
 Before `swap`:
+
 |husband|add_1 -> pointing at the "Fred" in Heap|
 |-|---|
 
@@ -298,6 +307,7 @@ Before `swap`:
 |-|---|
 
 **in Heap:**
+
 |add_1|"Fred\0"|
 |-|---|
 
@@ -306,6 +316,7 @@ Before `swap`:
 <br>
 
 After `swap`:
+
 |buffer|"Fred"|
 |-|---|
 
@@ -324,6 +335,7 @@ After `swap`:
 |-|---|
 
 **in Heap:**
+
 |add_1|"Wilm\0"|
 |-|---|
 
@@ -553,6 +565,6 @@ void* binarySearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(vo
 The type of function that gets passed right here has to be either a **global function** that has nothing to do with the class or it has to be **a method inside a class that’s declared as static**, which means that it does not have any this pointer passed around on your behalf behind
 the scenes.
 
-**C++ methods**, those** number functions that are defined in classes**, normally **pass around the address of the receiving object via an invisible parameter called `this`**. If you need to you can actually refer to the keyword this inside the implementation of any method, and it just evaluates to the address of the object that’s being manipulated.
+**C++ methods**, those **number functions that are defined in classes**, normally **pass around the address of the receiving object via an invisible parameter called `this`**. If you need to you can actually refer to the keyword this inside the implementation of any method, and it just evaluates to the address of the object that’s being manipulated.
 
 That’s what makes a method different than a regular function. **Regular functions** have nothing to do with objects so there’s **no invisible `this` pointer being passed around**. You have to pass one of those object-oriented-less normal functions, or the name of one, as the fifth primary to bsearch.

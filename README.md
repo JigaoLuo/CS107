@@ -35,4 +35,13 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - `void* linearSearch(void* key, void* base, int n, int elemSize)`
 - `void* linearSearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(void*, void*))`
 - `int IntCmp(void* elem1, void* elem2)`
+- `void* binarySearch(void* key, void* base, int n, int elemSize, int (*cmpFunc)(void*, void*))`
+- `int StrCmp(void* vp1, void* vp2)`
+
+[Lecture_5 + 6: Int Stack & Generics Stack](Notes/lec5&6.md)
+- `Stack.h` for `int` 
+- `Stack.c` for `int`
+- `Stack.h` for `void*` 
+- `Stack.c` for `void*`
+
 
