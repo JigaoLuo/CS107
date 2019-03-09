@@ -43,5 +43,9 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - `Stack.c` for `int`
 - `Stack.h` for `void*` 
 - `Stack.c` for `void*`
+- Upgraded Stack with `freeFun`
 
+[Lecture_7: rotate, quickSort](Notes/lec7.md)
+- `rotate`
+- `qsort`
 

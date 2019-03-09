@@ -355,10 +355,432 @@ marked as `private`, or `static`, then there’s none of those collisions going 
 <br>
 
 ```C++
-void StackPo(Stack* s, void* elemAddr)
+void StackPop(Stack* s, void* elemAddr)
 {
   void* source = (char*)s->elems + (s->logicLen - 1) * s->elemSize;
   memcpy(elemAddr, source, s->elemSize);
   s->logicLen--;
 }
 ```
+
+
+Use a generic stack to store a collection of strings and print them out in reverse order.
+
+```C++
+int main(int argc, char** argv)
+{
+  const char* friends[3] = {"AL", "Bob", "Carl"};
+  Stack stringStack;
+  StackNew(&string， sizeof(char*));
+  for (int i = 0; i < 3; ++i) {
+    char* copy = strdup(friend[i]);
+    StackPush(&stringStack, &copy);
+  }
+  char* name;
+  for (int i = 0; i < 3; ++i) {
+    StackPop(&stringStack, &name);
+    printf("%s\n", name);
+    free(name);
+  }
+  StackDispose(&stringStack);
+}
+```
+
+- After `Stack stringStack;`: 16 Bytes of **nothing** meaningful
+
+|add_1| ---|
+|-|---|
+
+|add_1 + 4| ---|
+|-|---|
+
+|add_1 + 8| ---|
+|-|---|
+
+|add_1 + 12| ---|
+|-|---|
+
+<br>
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+<br>
+<br>
+<br>
+
+- After `StackNew(&string， sizeof(char*));`: 16 Bytes of **something** 
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 0|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|add_of_array (4B * 4 = 16B)|-|-|-|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+<br>
+<br>
+<br>
+
+- `i = 0`:
+
+|copy|char_add_1|
+|-|---|
+
+|ptr_to_copy|copy|
+|-|---|
+
+a deep copy of `"Al\0"` in the heap.
+
+When you `push` an element onto the stack, **you transfer ownership from you to the stack**. 
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 1|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|add_of_array (4B * 4 = 16B)|char_add_1|-|-|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+
+<br>
+<br>
+<br>
+
+- `i = 1`:
+
+|copy (redeclared and reinitialized)|char_add_2|
+|-|---|
+
+|ptr_to_copy|copy|
+|-|---|
+
+<br>
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 2|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|add_of_array (4B * 4 = 16B)|char_add_1|char_add_2|-|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+<br>
+<br>
+<br>
+
+- `i = 2`:
+
+|copy (redeclared and reinitialized)|char_add_3|
+|-|---|
+
+|ptr_to_copy|copy|
+|-|---|
+
+<br>
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 3|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|add_of_array (4B * 4 = 16B)|char_add_1|char_add_2|char_add_3|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+
+<br>
+<br>
+<br>
+
+```C++
+for (int i = 0; i < 3; ++i) {
+  StackPop(&stringStack, &name);
+  printf("%s\n", name);
+  free(name);
+}
+```
+So, I’m really transferring ownership of these three
+dynamically allocated copies over to the stack. What I wanna do now is I wanna go ahead and I wanna print these things out. I really wanna ask for ownership back.
+
+- `i = 1`:
+
+|name|char_add_3|
+|-|---|
+
+|ptr_to_name|name|
+|-|---|
+
+<br>
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 2|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|add_of_array (4B * 4 = 16B)|char_add_1|char_add_2|-|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
+
+
+
+<br>
+<br>
+<br>
+
+### New version of `StackNew`
+
+#### Motivation
+
+```C++
+int main(int argc, char** argv)
+{
+  const char* friends[3] = {"AL", "Bob", "Carl"};
+  Stack stringStack;
+  StackNew(&string， sizeof(char*));
+  for (int i = 0; i < 3; ++i) {
+    char* copy = strdup(friend[i]);
+    StackPush(&stringStack, &copy);
+  }
+  StackDispose(&stringStack);
+}
+```
+
+```C++
+void StackDispose(Stack *s)
+{
+  free(s->elems);
+}
+```
+Now, the problem comes, when I actually call `StackDispose`, the stack actually has some elements that it still owns.
+
+`Stac ispose` should be able to say, “Okay, I seem to have retained ownership of some elements that were pressed onto me. I would like to be able to dispose of these things on behalf of the client before I go and clean up, and donate this blob of memory back to the heap.” 
+
+Many times there’s nothing to be done at all. When this thing stores `int`s, or `long`s, or `double`s, or `char`s, you don’t have to go in and zero them out. That’s really not that useful. 
+
+You do have to be careful about donating back any **dynamically allocated
+resources**, or maybe any open files. That’s less common, but dynamic memory allocation is certainly more common. If these things really are owned by the stack at the time it’s disposed of, then the `StackDispose` function has to figure out how to actually pass these things right there to `free`. It’s actually very difficult to do that because the implementation of `StackDispose` doesn’t actually know that these things are pointers. It just knows, at best, that they’re four-byte figures. It is capable of computing these addresses, and so if the depth of the stack is three, so that those three arrows are arrows that point to elements it’s holding for the client. 
+
+#### Upgrade
+What I wanna do here is I want to upgrade this right here to not take two arguments, but to take three arguments.
+
+```C++
+typedef struct { // upgraded
+  void* elems;
+  int elemSize;  // new field
+  int logicalLen;
+  int allocLeng;
+  void (*freeFun)(void*);
+} Stack;
+
+void StackNew(Stack* s, int elemSize, void (*freeFun)(void*)) // upgraded
+{
+  s->elemSize = elemSize;
+  asser(s->elemSize > 0);
+  s->logicalLen = 0;
+  s->allocLen = 4;
+  s->elems = malloc(4 * elemSize);  // 4 * 4
+  assert(s->elems != NULL);
+}
+```
+The fifth field `void (*freeFun)(void*)` is actually either some `NULL` pointer, or a pointer to a legitimate合法 freeing function.
+
+`void (*freeFun)(void*)` takes a void* and doesn’t return anything.
+
+The idea here is that I want to pass to the constructor function information about **how to destroy any elements that it holds for me when I call `StackDispose`.**
+
+Those three arrows – if you’re dealing with a stack of depth three, and it’s storing strings – it’s prepared to pass those three things in sequence. Those three things in sequence to this function that you write and pass `freeFun` And it will invoke `freeFun` for every single element it
+holds for you.
+
+
+|add_1| add_of_array|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 0|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+|add_1 + 16| freeFun_add|
+|-|---|
+
+<br>
+
+|freeFun_add| freeFun|
+|-|---|
+
+
+
+If you’re storing these base types that have no freeing needs, I expect the client to pass an `NULL` here, and that will be checked for and `StackDispose`.  
+If you’re storing things like `char*`s, or `pointers to structs`, or even `direct struct`s that have pointers inside that are **pointed to dynamically allocated memory**, then you have a **meaningful free function**.
+
+```C++
+void StackDispose(Stack *s)  // upgraded
+{
+  if (s->freeFun != NULL) {
+    for (int i =0; i < s->logicLen; ++i) {
+      s->freeFun((char*)s->elems + i * s->elemSize);
+    }
+  }
+  free(s->elems);
+}
+```
+
+<br>
+<br>
+<br>
+
+- Example with `String` (for the situation above before upgrading):
+```C++
+void stringFree(void* elem)
+{
+  free(*(char**)elem);
+}
+```
+
+```C++
+const char* friends[3] = {"AL", "Bob", "Carl"};
+Stack stringStack;
+StackNew(&string， sizeof(char*), stringFree);
+// ...
+```
+
+- **Wrong** example with `String`:
+
+```C++
+void stringFree(void* elem)
+{
+  free((char*)elem); // pointer wrongly placed
+}
+```
+
+**What would happen?**  
+Only `free`: `s->elems`, `s->elems + 4`, `s->elems + 8` ... in the case of `String`. $\equiv$ `char_add_1`, `char_add_2`, `char_add_3` will be freed. These things are not `malloc` or `realloc` in Heap. 
+
+Whan we want: the `char*` pointed by `char_add_1`, `char_add_2`, `char_add_3` should be freed. These things are `malloc` or `realloc` in Heap. 
+
+
+|add_1| s->elems|
+|-|---|
+
+|add_1 + 4| 4 - elemSize - sizeof(char*)|
+|-|---|
+
+|add_1 + 8| 2|
+|-|---|
+
+|add_1 + 12| 4 - allocLeng|
+|-|---|
+
+<br>
+
+|s->elems (4B * 4 = 16B)|char_add_1|char_add_2|char_add_3|-|
+|-|---|---|---|---|
+
+|char_add_1| "AL\0"|
+|-|---|
+
+|char_add_2| "Bob\0"|
+|-|---|
+
+|char_add_3| "Carl\0"|
+|-|---|
