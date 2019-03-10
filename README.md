@@ -57,3 +57,9 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 [Lecture_9: Assembly](Notes/lec9.md)
 - Assembly (MIPS like)
 
+[Lecture_10: Assembly Call Convention](Notes/lec10.md)
+- Assembly Call Convention
+- Parameter in Stack
+- `CALL`, `RET`
+- `SP`
+
