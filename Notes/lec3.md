@@ -11,7 +11,7 @@ pi.num = 22;
 pi.denum = 7;
 ```
 Low Add., **base pointer of pi is pointing here**
-|pi.num|22| <- *pi is pointing here|
+|pi.num|22| <- &pi is pointing here|
 |---|---|---|
 
 |pi.denum|7|

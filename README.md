@@ -49,3 +49,11 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - `rotate`
 - `qsort`
 
+[Lecture_8: malloc, realloc, free](Notes/lec8.md)
+- RAM = heap + stack +...
+- Heap
+- `malloc`
+
+[Lecture_9: Assembly](Notes/lec9.md)
+- Assembly (MIPS like)
+
