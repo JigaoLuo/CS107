@@ -38,3 +38,99 @@ printf("Width is %d\n", 480);
 int area = 480 * 720;
 ```
 It is really text, at the moment – it’s just that, when it’s fed to the next phase of compilation, it’ll go ahead, and it’ll chew on those things, and recognize that they really are numbers. And that’s when it might do the multiplication.
+
+<br>
+<br>
+
+```
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+```
+
+<br>
+<br>
+
+```
+#define NthElemAddr(base, elemSize, index) ((char*)base+index * elemSize)
+```
+
+Now the thing about this is this looks like a function call. There is really no type checking done on these things right here, so this **only works post preprocessor time**. If this gets specified to be a pointer, and these are things that can be multiplied together and ultimately be treated as an integer offset.
+
+```C
+void* vertorNth (vector* v, int position)
+{ 
+  assert(position >= 0);
+  assert(position < v->logicLen);
+  return NthElemAddr(v->elems, v->elemSize, postion);
+}
+```
+
+---
+
+### `assert` is a marko
+
+```C
+#ifdef NDEBUG
+ #define assert(cond) (void) 0  
+else
+ #define assert(cond) (cond) ? ((void) 0) : (fprintf(stderr, "string"), exit(0));
+```
+
+---
+
+### `#include`
+
+```C
+#include <stdio.h>
+#include <assert.h>
+#include "vector.h"
+```
+
+
+The preprocessor folds over that line `#include "vector.h";` and says, “Let me go find this file. Oh, I found it.” It removes that line `#include "vector.h";` and it replaces it with the full contents of `vector.h` file. 
+
+And so the stream text that it builds for you as part of preprocessing, the output of preprocessing, it’s what’s called **a translation unit** where all the pound defines and all the pound includes have been stripped out. It re-creates the text that’s actually fed to the compiler.
+
+
+---
+
+`main.c`
+```C
+#include <stdio.h>  // printf
+#include <stdlib.h>  // malloc, free
+#include <assert.h>
+
+int main(int argc, char* argv[])
+{
+  void* memory = malloc(480);
+  assert(memory != NULL);
+  printf("Yay!\n");
+  return 0;
+}
+
+
+```
+
+`#include <stdio.h> 
+#include <stdlib.h> 
+#include <assert.h>`
+It’s going to run it through the **preprocessor**. You know that these three things would **be recursively replaced** to whatever extent it’s needed to build one big stream of text without any `#include` and `#define `, which at the end has this `main function` here.
+
+
+Here is the full `.o` file that’s generated as the compiler digests the expansion of this to a translation unit. 
+```
+...
+CALL <malloc>
+...
+CALL <fprintf> ; for assert marko 
+...
+CALL <printf>
+...
+CALL <free>
+RV = 0
+RET
+```
+
+link to `a.out`: 
+
+The only requirement that’s needed past compilation:
+When it tries to create an executable, you’re technically in what’s called **the link phase where it tries to bundle all the `.o` files that are relevant to each other.** 
