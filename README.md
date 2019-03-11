@@ -61,6 +61,14 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - Assembly Call Convention
 - Parameter in Stack
 - `CALL`, `RET`
-- `SP`
+- `SP` for Stack Pointer
 - Recursion. [See in PDF, page 350](../CS107.pdf)
 
+[Lecture_11: Pointer and Reference](Notes/lec11.md)
+- Pointer and Reference
+- Struct and Class
+- `static`
+
+[Lecture_12: Compilation and linking](Notes/lec12.md)
+- Preprocessor
+- `#define`, `#include`
