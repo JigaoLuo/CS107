@@ -72,3 +72,12 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 [Lecture_12: Compilation and linking](Notes/lec12.md)
 - Preprocessor
 - `#define`, `#include`
+- `assert` in a marko
+- what happens if no `#include`
+- prototypes with `strlen` and `memcmp`
+- Function overloading in `C` and `C++`
+
+[Lecture_13: Compilation and linking](Notes/lec13.md)
+- Segmentation faults and Bus error
+- Using memory to form a infinite loop. (but not working at my PC)
+
