@@ -80,4 +80,8 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 [Lecture_13: Compilation and linking](Notes/lec13.md)
 - Segmentation faults and Bus error
 - Using memory to form a infinite loop. (but not working at my PC)
+- `printf`
 
+[Lecture_14: Thread](Notes/lec14.md)
+- Process and MMU
+- Thread

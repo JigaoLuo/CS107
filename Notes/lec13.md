@@ -489,7 +489,7 @@ Loop can not ends like the `int array`.
 #### Example 3: from midterm
 
 ```C
-int main(int argc, char* agrv[])
+int foo()
 {
   int array[4];
   int i;
@@ -499,6 +499,10 @@ int main(int argc, char* agrv[])
   return 0;
 }
 ```
+
+I don’t care that the array hasn’t been initialized. 
+
+<br>
 
 High Add.
 
@@ -598,4 +602,136 @@ Low Add.
 |Stack Segement (end)|--|
 |---|--|
 
-Then `CALL <foo>` again and again and again.
+
+What values of `array[4]` were they before? We have no idea. But it will certainly take whatever values happen to reside there and decrease them by four. Unfortunately, because the test is wrong, it goes up and it
+decrease this `|add + 8|saved PC - 4|` numerically by four as well. So `PC` not pointing to the next instruction any more, but pointing to the same `CALL <foo>` instruction. Then `CALL <foo>` again and again and again.
+
+That is probably the fifth example of infinite recursion we’ve seen in the last
+two days. 
+
+<br>
+<br>
+<br>
+
+#### Example 4: No infinite recursion
+
+```C
+int main(int argc, char* agrv[])
+{
+  DeclearAndInitArray();
+  PrintArray();
+  return 0;
+}
+
+// declare this array, locally update it to be a counting array and then leave.
+void DeclearAndInitArray() {
+  int array[100];
+  int i;
+  for (int i = 0; i < 100; i++) {
+	  array[i] = i;
+  }
+}
+
+void PrintArray() {
+  ini array[100];
+  int i;
+  for (int i = 0; i < 100; i++) {
+	  printf("%d\n", array[i]);
+  }
+}
+```
+
+And the answer is, it is working as far as they’re concerned, **because that manages to print out
+0 through 99, inclusive.**
+
+This `DeclearAndInitArray()` right here, built-in activation record of 404 bytes, goes down and it lays down the counting array in the top 100 of the 101 slots. Returns.
+
+`PrintArray()` calls a function that has exactly the same image for its activation record. So
+it goes down and embraces the same 404 bytes. And it happens to print over the footprint of this function `DeclearAndInitArray()`. It’s not like when this thing returned it cleared out all of those bits and said we got to scramble this so it doesn’t look like a counting array. It doesn’t take the time to do that. So basically, what happens is if this is the top of the activation record and this is the bottom of the activation record, SP is descendant once, this is filled up with happy information, comes back up
+after the first call returns, comes back to the same exact point, the happy face is still
+there. We print over it and it happens to be revisiting the same exact memory with the
+same exact activation record, so it prints everything out exactly the same. 
+
+So you almost think of this as this abusive, perverse way of dealing with a global variable. And
+you’re setting up parameters for code that needs to run later on. This example wouldn’t
+exactly work that way. This isn’t a great example of that, but at least it highlights the
+feature. This thing called “channeling,” that’s exactly what this thing is when really advanced
+C++ programmers take advantage of this type of knowledge as to how memory is laid
+out. 
+
+
+
+<br>
+<br>
+<br>
+
+## `printf`
+
+`printf` takes anything between one and, in theory, an infinite number of arguments. What kind of prototype exists in the language to accommodate that kind of thing? Well, we always need the control string.
+
+
+```C
+int printf(const char* control, ...)
+```
+So the first argument to this thing is either a `char*` or a `const char *` that can polish
+supports const. But then, there’s no data type that really has to be set in stone. There doesn’t even have to be a second argument, much less a data type attached to it. 
+
+And the complier is actually quite promiscuous, and what it will accept is arguments two, three, and four, provided that dot `...` is there. The complier is **not obligated to do any kind of type checking** between `control` and what this evaluates to (the real values represented by `...`).
+
+`GCC`, for quite some time, has an extension to the C that is implementing. Where it does **try to do type checking** if you mismatch, it’s doing a little bit more work at compile time than it’s really obligated
+to do. It wants to make sure that this `printf` call works out. So if you were to put `%s` and `4` for value, most compliers would just let you do it and run and it would just lead to really bad things. But `GCC` will, in fact, flag it and say, you didn’t mean to do that. 
+
+
+The return type `int` is the number of placeholders that are successfully bound to. It’s very unusual for `printf` to fail. `scanf`, the read in equivalent of `printf`, can fail more often.
+But if, for whatever reason something goes badly, this would return `-1`. 
+
+Do you know how `ifstreams` set the fail bit to true so that when you call the `.fail` method
+inside `C++`, it’ll basically evaluate to true and that’s the way you break out of a file
+reading program? Well, you’re relying on the equivalent of `printf`’s return value, which is
+called `scanf` or `fscanf` to return to `-1` when it’s at the end of the file. 
+
+
+The reason I’m bringing this up is because, based on what we know and the way we’ve
+adopted a memory model, I now can defend **why we push parameters on the stack from
+right to left**, why the 0-th parameter is always at the bottom and the 1-th parameter is
+always above that. 
+
+<br>
+<br>
+<br>
+
+```C
+printf("%d + %d = %d\n", 4, 4, 8);
+```
+
+Let’s just consider that call right there. The prototype during compilation just says that call is legitimate, but when it actually complies that `printf` there, it really does go and count parameters and figures out exactly how many bytes to decrement the stack pointer by for that particular call. 
+
+High Add.
+
+|add|8|
+|-|---|
+
+|add + 4|4|
+|-|---|
+
+|add + 8|4|
+|-|---|
+
+|add + 12|another add|
+|-|---|
+
+|add + 16|saved PC |
+|-|---|
+
+Low Add.
+
+|Stack Segement (end)|--|
+|---|--|
+
+<br>
+
+|another add|"%d + %d = %d\n"|
+|-|---|
+
+If reads a `%d` right at the front, it says, oh, the four bytes above the control string must be an `int`. And then it sees another percent D along the way. 
+
