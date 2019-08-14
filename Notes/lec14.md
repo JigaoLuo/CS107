@@ -151,22 +151,3 @@ There’s only one copy of the code. You only need one copy of the code. It’s 
 
 It’s fine for this stack and this stack to both be guided by the same set of assembly code
 instructions, as long as each one has some kind of thread identifier. 
-
-
-```C
-int main() {
-    int numAgents = 10;
-    for (int i = 0; i < 10; i++) {
-        sellTicket(i, 15);
-    }
-}
-```
-
-I have
-this really simple program, int main – and there’s no threading. I’m actually thinking about ticket
-agents who answer the telephone at United or some other airline that still hasn’t declared
-bankruptcy yet. In fact, let’s say that there are 150 seats on the flight. The idea of “sell tickets” is that it’s supposed to be in place to simulate the requirement that some ticket agent actually sells 15 tickets before his or her job is done. 
-
-As long as these run in sequence, eventually you’ll get to the point where you actually sell 150 tickets in this really rude but simple simulation. The problem here is that in the real world, it’s just fine for all ten of these agents to be answering telephones simultaneously. 
-
-The idea that we’re going to be able to get that `sellTicket` function right there to run in ten different threads. In other words, I’m going to spawn off ten different threads. All of them are going to be following the same exact recipe, where each one has to sell 15 tickets, and when a particular thread exists, we just know because of the way we code it up that 15 tickets have been sold. 
