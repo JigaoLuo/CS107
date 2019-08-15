@@ -96,3 +96,6 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 
 [Lecture_17: Thread](Notes/lec17.md)
 - FTP download (wait all thread to be finished)
+
+[Lecture_18: Thread](Notes/lec18.md)
+- Ice Cream Store Simulation 

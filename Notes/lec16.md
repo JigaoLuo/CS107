@@ -565,3 +565,74 @@ minimum amount of work to prevent deadlock. There is a reason for that, because 
 When I put a `2` there I’m taking more control over how threads are scheduled. That means up to three threads can block on this line right here as opposed to just one. 
 
 If you make this a 4 that means that up to four threads can make as much progress as is really possible before they’re blocked and pulled off the processor, whereas if I make it a 2 we’re blunting some threads prematurely.
+
+
+```C
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>   // sleep()
+
+sem_t forks[5];
+sem_t iAmAllowedToEat;
+
+struct thread_data
+{
+ int filosopher_id;
+};
+
+void *philosopherLife(void *threadarg)
+{
+ struct thread_data *my_thData;
+ my_thData = (struct thread_data *) threadarg;
+ int id = my_thData->filosopher_id;
+ for (int i = 0; i < 4; i++)
+ {
+  //think();
+  sleep(1);
+  sem_wait(&iAmAllowedToEat);
+  sem_wait(&forks[id]);
+  sem_wait(&forks[(id + 1) % 5]);
+  //Eat();
+  printf("Philosopher %d is eating\n", id + 1);
+  sem_post(&forks[id]);
+  sem_post(&forks[(id + 1) % 5]);
+  sem_post(&iAmAllowedToEat);
+ }
+ //think();
+ pthread_exit(NULL);
+}
+
+int main()
+{
+ for (int i = 0; i < 5; i++)
+ {
+  sem_init(&forks[i], 0, 1);
+ }
+ sem_init(&iAmAllowedToEat, 0, 4);
+
+ pthread_t philisopherThreads[5];
+ struct thread_data my_thData[5];
+ for (int philisopher = 0; philisopher < 5; philisopher++)
+ {
+  my_thData[philisopher].filosopher_id = philisopher;
+
+  if (pthread_create(&philisopherThreads[philisopher], NULL,
+    philosopherLife, (void *) &my_thData[philisopher]))
+  {
+   fprintf(stderr, "Error creating thread\n");
+   return 1;
+  }
+  else
+  {
+   printf("Philosofer%d Thread is created\n", philisopher + 1);
+  }
+ }
+ for (int philisopher = 0; philisopher < 5; philisopher++)
+ {
+  pthread_join(philisopherThreads[philisopher], NULL);
+ }
+ printf("EXIT");
+ return 0;
+}
+```
