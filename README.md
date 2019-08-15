@@ -90,6 +90,9 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - binary Semaphore
 - Register Behavior as threads get swapped off the processor
 
-[Lecture_16: Thread](Notes/lec15.md)
+[Lecture_16: Thread](Notes/lec16.md)
 - Reader Writer (Binary Rendezvous Pattern)
 - Dining Philosophy Problem
+
+[Lecture_17: Thread](Notes/lec17.md)
+- FTP download (wait all thread to be finished)

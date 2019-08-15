@@ -424,6 +424,8 @@ exact type of thing for the readers.
 
 ![Dining_Philosophy_Problem](Pic/Dining_Philosophy_Problem.png)
 
+![Dining_Philosophy_Problem](Pic/Dining_Philosophy_Problem_2.png)
+
 Surrounding the table are five **philosophers**. And, in between each philosopher is a **fork** and every single philosopher follows the same **formula** every single day. They wake up, they think for a while and they eat and they think for a while and they eat and they think for a while and they eat, and of course they
 think for a while before they go to bed.
 
@@ -437,7 +439,7 @@ Two neighboring philosophers decide to stop thinking at the same time and will e
 ### Dining Philosophy Problem 1.0 (Trivial)
 
 ```C
-Semaphore forks[] = {1, 1, 1, 1, 1};
+Semaphore forks[] = {1, 1, 1, 1, 1};  /// shorthand　缩写
 
 void philosophers(int id) {
     for (int i = 0; i < 3; i++) {
@@ -448,6 +450,7 @@ void philosophers(int id) {
         semaphoreSignal(forks[id]);
         semaphoreSignal(forks[(id + 1) % 5]);
     }
+    Think();
 }
 ```
 
@@ -460,6 +463,8 @@ void philosophers(int id) {
 `philosophers3`: `Think()` and get `fork[3]`, then he swapped by processor
 
 `philosophers4`: `Think()` and get `fork[4]`, then he swapped by processor
+
+<br>
 
 `philosophers0`: want get `fork[1]`, which is acquired by `philosophers1`
 
@@ -478,13 +483,11 @@ cannot.
 
 #### A Try:
 
-I actually know that given that there are **five forks**. BUT ten forks need to be held in order
-for 5 philosophers to eat, I can tell that at most two philosophers are going to be allowed to eat at any one time. Because if three philosophers are eating, that requires six forks to be held and we just don’t have that many. 
+I actually know that given that there are **five forks**. BUT ten forks need to be held in order for 5 philosophers to eat, I can tell that at most two philosophers are going to be allowed to eat at any one time (5 / 2 = 2). Because if three philosophers are eating, that requires six forks to be held and we just don’t have that many. 
 
 
 Okay, we could also say that as long as we just
-prevent one philosopher from grabbing any forks whatsoever, it’s technically possible to
-let four philosophers grab forks. Three of them may be blocked, but since I’m only allowing four philosophers to grab forks, exactly one of them will be able to grab two forks as opposed to one. 
+prevent one philosopher from grabbing any forks whatsoever, it’s technically possible to let four philosophers grab forks. Three of them may be blocked, but since I’m only allowing four philosophers to grab forks, exactly one of them will be able to grab two forks as opposed to one. 
 
 Now, 
 1. two being allowed to eat, 
@@ -494,3 +497,71 @@ There are **two different heuristic**s for solving the deadlock problem. I think
 
 You may think it’s really weird to allow four to try but all I’m trying to do is **remove the deadlock**. I technically will remove the deadlock if I limit the
 number of philosophers trying to simultaneously eat, to not be five, but to be four.
+
+Normally what you do is you **implant the minimum amount of work to remove the possibility of deadlock**. 
+
+<br>
+<br>
+
+### Dining Philosophy Problem 2.0 (Try 1: two being allowed to eat)
+
+```C
+Semaphore forks[] = {1, 1, 1, 1, 1};  /// shorthand　缩写
+Semaphore numAllowedToEat(2);
+
+void philosophers(int id) {
+    for (int i = 0; i < 3; i++) {
+        Think();
+        semaphoreWait(numAllowedToEat);
+
+        semaphoreWait(forks[id]);
+        semaphoreWait(forks[(id + 1) % 5]);
+        Eat();
+        semaphoreSignal(forks[id]);
+        semaphoreSignal(forks[(id + 1) % 5]);
+
+        semaphoreSignal(numAllowedToEat);
+    }
+    Think();
+}
+```
+
+`semaphoreWait(numAllowedToEat);`: "Please wait for me to be **one of the two that is allowed to eat**."
+
+Scoop of `numAllowedToEat` is critical region. It’s not the same type of critical region we saw before. Critical region normally means at most one because they are concurrency – there are race condition possibilities. This is a different type of critical region. In fact, most people wouldn’t call it a critical region but I’ll call it that. 
+
+
+<br>
+<br>
+
+### Dining Philosophy Problem 3.0 (Try 2: allowing four to try to eat, )
+
+```C
+Semaphore forks[] = {1, 1, 1, 1, 1};  /// shorthand　缩写
+Semaphore numAllowedToEat(4);
+
+void philosophers(int id) {
+    for (int i = 0; i < 3; i++) {
+        Think();
+        semaphoreWait(numAllowedToEat);
+
+        semaphoreWait(forks[id]);
+        semaphoreWait(forks[(id + 1) % 5]);
+        Eat();
+        semaphoreSignal(forks[id]);
+        semaphoreSignal(forks[(id + 1) % 5]);
+
+        semaphoreSignal(numAllowedToEat);
+    }
+    Think();
+}
+```
+
+The reason the `4` works is because as long as somebody’s prevented from grabbing either fork then there’s **at least one `philosopher` thread that’s capable of grabbing two forks**. Maybe the other three or blocked. But it’s always the case that exactly – at least one philosopher will be able to grab two forks. 
+
+That’s the minimum amount of a fix that I need to implant into the code to make sure I don’t have deadlock. So concurrency and multithreading purists usually like to do the
+minimum amount of work to prevent deadlock. There is a reason for that, because the minimum amount that you implant there – you remove the deadlock but you still grant the thread manager as much flexibility in how they schedule threads as possible.
+
+When I put a `2` there I’m taking more control over how threads are scheduled. That means up to three threads can block on this line right here as opposed to just one. 
+
+If you make this a 4 that means that up to four threads can make as much progress as is really possible before they’re blocked and pulled off the processor, whereas if I make it a 2 we’re blunting some threads prematurely.
