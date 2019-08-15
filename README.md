@@ -99,3 +99,6 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 
 [Lecture_18: Thread](Notes/lec18.md)
 - Ice Cream Store Simulation 
+
+[Lecture_19: Functional Programming](Notes/lec19.md)
+- `Scheme` introduction
