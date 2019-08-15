@@ -268,9 +268,11 @@ then you can look it yourself.
 void sellTickets(int agentId, int* numTicketToSell, Semaphore lock) {
     while (true) {
         semaphoreWait(lock);
+        /// Critical Region starts[
         if (*numTicketToSell == 0) break;
-        printf("Agent %d sells a ticket\n", agentId);
         (*numTicketToSell)--;
+        /// Critical Region ends]
+        printf("Agent %d sells a ticket\n", agentId);
         semaphoreSignal(lock);
     }
     printf("Agent %d All done!\n", agentId);
@@ -287,7 +289,6 @@ So what I　want to do is I want to wait on the locked bathroom door and if I ha
 3. 
 ```C
         if (*numTicketToSell == 0) break;
-        printf("Agent %d sells a ticket\n", agentId);
         (*numTicketToSell)--;
 ```
 
@@ -375,3 +376,181 @@ int main() {
 If I have the opposite error and I do that right
 there, from a programmatic standpoint, if it’s gonna be two, it might as well be 10. If you’re gonna let two people in the bathroom why not let all 10? If you’re gonna actually let two people go into the critical region and muck with global data at the same time, then
 you have the potential for having two threads deal with a shared global variable in a way that they really can’t trust each other.
+
+
+<br>
+<br>
+<br>
+
+The semaphore – it is more less like a – basically a **synchronized counter variable** that is **always greater than or equal to zero**. 
+- And so if I construct a semaphore around the number one, and I  levy a `semaphoreWait` call against the semaphore, this as a function figures out how to atomically reduce this one to a zero. And so this is basically equivalent to the **minus minus** but it does the **minus minus** in such a way that it actually fully commits to the demotion of the number to one that’s one lower than it. 
+
+- 1 -> 0
+
+<br>
+<br>
+
+- `semaphoreSignal` on the same exact semaphore would actually bring this back up to a one. 
+- 0 -> 1
+
+<br>
+<br>
+
+### Case with two many `semaphoreWait`
+
+semaphore value|1|
+|-|---|
+
+```C
+semaphoreWait(lock);
+semaphoreWait(lock);
+```
+
+Something more interesting happens, where this one right here decrements the one down to a zero. Then this one right here would have a very hard time.
+Because semaphores at least in our library – this isn’t the case in all systems, but our semaphores are **not allowed to go negative**. So, when you do a `semaphoreWait` against a `zero variable`, then this thread actually says, **I can’t decrement that, at least not now.** I need somebody else **in another thread** to actually `plus plus (call semaphoreSignal(lock))` this so that I can actually pass through a `minus minus` **without making the number negative**. 
+
+So programmatically, the implementation of `semaphoreWait` is in touch with the thread library and so it actually when it’s attached to a `zero` behind the
+scenes, it immediately says ok, **I can’t make any progress right now**. It pulls itself off the processor它自行关闭处理器. It records itself as something that’s called `blocked`记录成阻塞的状态 and it puts it in this cue of　threads are not allowed to make progress until some other thread `signals a semaphore` they’re waiting on.不允许继续运行，知道其他的线程call `semaphoreSignal`
+
+
+`semaphore value` is not constrained to go between one and zero (binary). It can – this can be set to either be zero or one or five or ten. The only example we’ve seen so far is where the semaphore that’s coming in is initialized to surround the `one` because we really want it to function not so much as one as we want it to function as a true, and **it’s basically a light switch that goes on and off, on and off, and on and off**, and it’s used. And, we use `semaphoreWait` and `semaphoreSignal` against that semaphore to protect access to the `numTickets` variable that we have
+been addressed to. 
+
+<br>
+<br>
+<br>
+
+## Register Behavior as threads get swapped off the processor
+
+Somebody asked a very good question at the end of a lecture on Monday and I think I
+want to go over it. Some people were concerned with the case where `numTickets` takes
+minus minus, takes a one down to a zero, I don’t mean the lock, I mean the actual number of tickets and they thought that was the one problem we were worrying about.
+
+The answer is that’s not the case and I can actually tell you a little bit more about what happens **as threads get swapped off the processor and where all of their data gets stored线程交换处理器的时候　数据是如何存储的,** and show you that if the number of tickets is originally 100, there is as much of a **race condition** without the `semaphoreWait` and `semaphoreSignal` calls in the `minus minus` bringing the 100 down to a 99, as there is in bringing a one down to a zero. So, this is
+what would happen and this `(*numTicketToSell)--;` is going to be the most important line to concern ourselves with. 
+
+<br>
+<br>
+
+Just think about the scenario where there’s two agents. It is subdivided:
+
+
+|Stack|-|
+|-|---|
+
+|...|-|
+|-|---|
+
+|...|-|
+|-|---|
+
+|`the main stack frame`主堆栈结构. |-|
+|-|---|
+
+|&numTickets|numTickets = 100|
+|-|---|
+
+|...|-|
+|-|---|
+
+|...|-|
+|-|---|
+
+|`stack frame` Ticket Agent1|-|
+|-|---|
+
+|...|&numTickets|
+|-|---|
+
+|...|-|
+|-|---|
+
+|`stack frame` Ticket Agent2|-|
+|-|---|
+
+|...|&numTickets|
+|-|---|
+
+|...|-|
+|-|---|
+
+<br>
+<br>
+<br>
+
+### Register Behavior (Not Thread safe)
+
+
+- Agent1 has processor:  
+So, in a local register set: 
+
+|R1|&numTickets|
+|-|---|
+
+|R2|100|
+|-|---|
+
+after `--`:
+
+|R1|&numTickets|
+|-|---|
+
+|R2|99|
+|-|---|
+
+But now you’re swapped off the processor交换处理器. So, you’ve actually committed to the sale of a ticket. But, you’re swapped off the processor. **The 100 still resides in `numTickets` because we didn’t successfully flush back.**只是在寄存器里面进行了减法，还没来得及写进原变量，就失去了处理器 What happens is that the entire register state, **all 32 registers, including the PC and the SP and the RV registers, if this is the binary state of all those registers, it’s actually copied to the bottom of the thread that’s being swapped out, little stack frame.**
+
+
+|`stack frame` Ticket Agent1|-|
+|-|---|
+
+|...|&numTickets|
+|-|---|
+
+|R1|&numTickets|
+|-|---|
+
+|R2|100|
+|-|---|
+
+|Other Registers from 32 Register|-|
+|-|---|
+
+|...|-|
+|-|---|
+
+<br>
+<br>
+
+- After swapping off the processor, Agent2 has processor:  
+So, in a local register set: 
+
+|R1|&numTickets|
+|-|---|
+
+|R2|100|
+|-|---|
+
+after `--`:
+
+|R1|&numTickets|
+|-|---|
+
+|R2|99|
+|-|---|
+
+The 100 still resides in `numTickets` because we didn’t successfully flush back. We didn’t get to the point where we actually update it to be the decremented value.
+
+`Agent2` is prepared to flush with a 99 back to the
+global `numTickets` when this `Agent1` gets the processor back; `Agent1` going to flush a 99 back to the same space. So, this 99 from `Agent1` is designed to override a 100. Btut is this `Agent2` is going to override a 100 and one of the 99s is going to overwrite the other thread’s 99.
+
+SO: `Agent1` sold 1 ticket and `Agent2` sold one ticket, BUT `numTickets` = 99 => not thread safe
+
+<br>
+
+### Register Behavior (Thread safe with semaphore)
+
+**Only one** thread is allowed to go through and actually pull the global value into the local register, decrement it locally, and then flush it back out to the global integer, the thing that functions as a global integer, because everybody has a pointer to the same integer. **Before any of the thread is allowed to do any part of that**, so that is what I mean when I say that this is more or less committed to
+**atomically**. 
+
+Now, that is the overarching principle that is in place when you have threads, and in particular, you have threads accessing shared information. This is the programmatic equivalent of the two ATM machines where me and my best friend try to take out the last remaining $100.00 in my account at the same time, thinking we’re going to get $200.00. 

@@ -82,6 +82,14 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - Using memory to form a infinite loop. (but not working at my PC)
 - `printf`
 
-[Lecture_14: Thread](Notes/lec14.md)
+[Lecture_14: Process](Notes/lec14.md)
 - Process and MMU
+
+[Lecture_15: Thread](Notes/lec15.md)
 - Thread
+- binary Semaphore
+- Register Behavior as threads get swapped off the processor
+
+[Lecture_16: Thread](Notes/lec15.md)
+- Reader Writer (Binary Rendezvous Pattern)
+- Dining Philosophy Problem
