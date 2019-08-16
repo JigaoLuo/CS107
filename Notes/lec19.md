@@ -105,6 +105,22 @@ list you type in, that’s technically compilation, but it **also evaluates it a
 
 > (sum_of '(1 2 3 4))
 10
+
+> (sum_of '())
+0
+
+
+> (define fib (n)
+    if (zero? n) 0)
+        (if (= n 1) 1
+            (+ (fib (- n 1)
+                (fib (- n 2)))))
+
+> (define fib (n)
+    (if (or (= n 0)
+            (= n 1) n
+        (+ (fib (- n 1)
+            (fib (- n 2)))))))
 ```
 
 
