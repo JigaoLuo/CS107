@@ -102,3 +102,16 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 
 [Lecture_19: Functional Programming](Notes/lec19.md)
 - `Scheme` introduction
+
+[Lecture_20: Functional Programming](Notes/lec20.md)
+- `flatten`
+- `sorted?`
+- What happens when you invoke a function
+
+[Lecture_21: Functional Programming](Notes/lec21.md)
+- `map`
+- `eval`
+- `apply`
+- `flatten`
+- `translate`
+
