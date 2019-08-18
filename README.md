@@ -120,5 +120,9 @@ Here would be some lecture notes and assignments coming. I would try my best to 
 - `permute`
 
 [Lecture_23: Memory Issue in Functional Programming](Notes/lec23.md)
+- `int`
+- `string`
+- `list`
+- Garebge Collection
 
 [Lecture_24: Python](Notes/lec24.md)
